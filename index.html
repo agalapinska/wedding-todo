@@ -1,3 +1,5 @@
+<!doctype html>
+<html lang="pl">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ślubna lista zadań</title>
@@ -96,6 +98,29 @@
     font-size: 15px;
     margin: 0;
   }
+  .sync {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 3px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .sync .s-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex: none;
+    transition: background 0.2s;
+  }
+  .sync.ok .s-dot { background: var(--ok); }
+  .sync.busy .s-dot { background: var(--groom); }
+  .sync.err .s-dot { background: var(--danger); }
 
   /* segmented role switcher — mobile only */
   .switcher {
@@ -314,6 +339,7 @@
 <header class="page">
   <h1>Ślubna lista zadań</h1>
   <p class="sub">Wspólny plan — każde z Was ma swoją listę.</p>
+  <div class="sync" id="sync"><span class="s-dot"></span><span class="s-text">łączenie…</span></div>
 </header>
 
 <nav class="switcher" aria-label="Wybór roli">
@@ -345,26 +371,104 @@
 
 <script>
 (function () {
-  var STORE_KEY = 'wedding-todo-v1';
+  var SYNC_URL = 'https://jsonblob.com/api/jsonBlob/019f5b49-9817-77db-9793-d16eb7bc655f';
+  var POLL_MS = 8000;
+  var TOMBSTONE_MS = 30 * 86400000; /* po 30 dniach usunięte zadania znikają też z magazynu */
+  var STORE_KEY = 'wedding-todo-v2';
   var ROLE_KEY = 'wedding-todo-role';
   var BASE_TAGS = ['logistyka', 'przewiezienie rzeczy', 'jedzenie', 'pytanie', 'dokumenty', 'dekoracje', 'goście', 'strój', 'muzyka'];
   var CUSTOM = '__custom__';
 
-  function load() {
+  function normalize(d) {
+    if (!d || !Array.isArray(d.tasks) || !Array.isArray(d.tags)) return { tasks: [], tags: [] };
+    d.tasks.forEach(function (t) {
+      if (!t.updatedAt) t.updatedAt = 1;
+      if (typeof t.deleted !== 'boolean') t.deleted = false;
+    });
+    return { tasks: d.tasks, tags: d.tags };
+  }
+
+  function loadLocal() {
     try {
-      var raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        var d = JSON.parse(raw);
-        if (d && Array.isArray(d.tasks) && Array.isArray(d.tags)) return d;
-      }
+      var raw = localStorage.getItem(STORE_KEY) || localStorage.getItem('wedding-todo-v1');
+      if (raw) return normalize(JSON.parse(raw));
     } catch (e) {}
     return { tasks: [], tags: [] };
   }
-  var state = load();
+  var state = loadLocal();
 
-  function save() {
+  function saveLocal() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
   }
+
+  /* --- scalanie zmian z dwóch urządzeń: nowsza wersja zadania wygrywa --- */
+  function merge(a, b) {
+    var byId = {};
+    a.tasks.concat(b.tasks).forEach(function (t) {
+      var cur = byId[t.id];
+      if (!cur || (t.updatedAt || 0) > (cur.updatedAt || 0)) byId[t.id] = t;
+    });
+    var now = Date.now();
+    var tasks = Object.keys(byId).map(function (k) { return byId[k]; })
+      .filter(function (t) { return !(t.deleted && now - t.updatedAt > TOMBSTONE_MS); });
+    var tags = [];
+    a.tags.concat(b.tags).forEach(function (t) { if (tags.indexOf(t) === -1) tags.push(t); });
+    return { tasks: tasks, tags: tags };
+  }
+
+  function fingerprint(d) {
+    var tasks = d.tasks.slice().sort(function (x, y) { return x.id < y.id ? -1 : 1; })
+      .map(function (t) { return [t.id, t.who, t.title, t.date, t.time, t.tag, t.done, t.deleted, t.updatedAt]; });
+    return JSON.stringify([tasks, d.tags.slice().sort()]);
+  }
+
+  /* --- synchronizacja --- */
+  var syncEl = document.getElementById('sync');
+  function setSync(cls, text) {
+    syncEl.className = 'sync ' + cls;
+    syncEl.querySelector('.s-text').textContent = text;
+  }
+
+  var syncing = false, syncQueued = false;
+  function sync() {
+    if (syncing) { syncQueued = true; return; }
+    syncing = true;
+    setSync('busy', 'synchronizuję…');
+    fetch(SYNC_URL, { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('GET ' + r.status);
+        return r.json();
+      })
+      .then(function (remoteRaw) {
+        var remote = normalize(remoteRaw);
+        var merged = merge(state, remote);
+        state = merged;
+        saveLocal();
+        render();
+        if (fingerprint(merged) !== fingerprint(remote)) {
+          return fetch(SYNC_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(merged)
+          }).then(function (r) { if (!r.ok) throw new Error('PUT ' + r.status); });
+        }
+      })
+      .then(function () {
+        setSync('ok', 'zapisano ' + new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }));
+      })
+      .catch(function () {
+        setSync('err', 'offline — zmiany zapisane na tym urządzeniu');
+      })
+      .then(function () {
+        syncing = false;
+        if (syncQueued) { syncQueued = false; sync(); }
+      });
+  }
+
+  setInterval(sync, POLL_MS);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) sync();
+  });
 
   function allTags() {
     return BASE_TAGS.concat(state.tags.filter(function (t) { return BASE_TAGS.indexOf(t) === -1; }));
@@ -430,18 +534,21 @@
         if (tag && allTags().indexOf(tag) === -1) { state.tags.push(tag); refreshTagSelects(); }
       }
       state.tasks.push({
-        id: 't' + state.tasks.length + '_' + Math.floor(Math.random() * 1e9),
+        id: 't' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 1e9).toString(36),
         who: who,
         title: title,
         date: form.date.value || '',
         time: form.time.value || '',
         tag: tag || '',
-        done: false
+        done: false,
+        deleted: false,
+        updatedAt: Date.now()
       });
-      save();
+      saveLocal();
       form.reset();
       form.querySelector('.custom-tag').classList.remove('show');
       render();
+      sync();
     });
   }
 
@@ -457,7 +564,7 @@
     document.querySelectorAll('.col').forEach(function (col) {
       var who = col.dataset.who;
       var list = col.querySelector('ul.tasks');
-      var tasks = state.tasks.filter(function (t) { return t.who === who; }).sort(sortTasks);
+      var tasks = state.tasks.filter(function (t) { return t.who === who && !t.deleted; }).sort(sortTasks);
       var open = tasks.filter(function (t) { return !t.done; }).length;
       col.querySelector('.count').textContent = tasks.length
         ? open + ' do zrobienia / ' + tasks.length
@@ -516,14 +623,18 @@
       if (!task) return;
       if (ev.target.matches('input[type="checkbox"]')) {
         task.done = ev.target.checked;
-        save(); render();
+        task.updatedAt = Date.now();
+        saveLocal(); render(); sync();
       } else if (ev.target.closest('.del')) {
-        state.tasks = state.tasks.filter(function (t) { return t.id !== task.id; });
-        save(); render();
+        task.deleted = true;
+        task.updatedAt = Date.now();
+        saveLocal(); render(); sync();
       }
     });
   });
 
   render();
+  sync();
 })();
 </script>
+</html>
