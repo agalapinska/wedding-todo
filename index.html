@@ -371,7 +371,8 @@
 
 <script>
 (function () {
-  var SYNC_URL = 'https://jsonblob.com/api/jsonBlob/019f5b49-9817-77db-9793-d16eb7bc655f';
+  /* jsonblob.com przechowuje dane; corsproxy.io omija brak nagłówków CORS w jsonblob */
+  var SYNC_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://jsonblob.com/api/jsonBlob/019f5b49-9817-77db-9793-d16eb7bc655f');
   var POLL_MS = 8000;
   var TOMBSTONE_MS = 30 * 86400000; /* po 30 dniach usunięte zadania znikają też z magazynu */
   var STORE_KEY = 'wedding-todo-v2';
