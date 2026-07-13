@@ -1,0 +1,529 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ślubna lista zadań</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #fafafa;
+    --surface-2: #f4f4f5;
+    --ink: #09090b;
+    --muted: #71717a;
+    --line: #e4e4e7;
+    --line-strong: #d4d4d8;
+    --btn-bg: #09090b;
+    --btn-fg: #ffffff;
+    --bride: #e11d48;
+    --groom: #2563eb;
+    --danger: #dc2626;
+    --ok: #16a34a;
+    --done: #a1a1aa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --surface: #0f0f10;
+      --surface-2: #1a1a1c;
+      --ink: #fafafa;
+      --muted: #8f8f98;
+      --line: #26262a;
+      --line-strong: #3a3a40;
+      --btn-bg: #fafafa;
+      --btn-fg: #09090b;
+      --bride: #fb7185;
+      --groom: #60a5fa;
+      --danger: #f87171;
+      --ok: #4ade80;
+      --done: #52525b;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #ffffff;
+    --surface: #fafafa;
+    --surface-2: #f4f4f5;
+    --ink: #09090b;
+    --muted: #71717a;
+    --line: #e4e4e7;
+    --line-strong: #d4d4d8;
+    --btn-bg: #09090b;
+    --btn-fg: #ffffff;
+    --bride: #e11d48;
+    --groom: #2563eb;
+    --danger: #dc2626;
+    --ok: #16a34a;
+    --done: #a1a1aa;
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --surface: #0f0f10;
+    --surface-2: #1a1a1c;
+    --ink: #fafafa;
+    --muted: #8f8f98;
+    --line: #26262a;
+    --line-strong: #3a3a40;
+    --btn-bg: #fafafa;
+    --btn-fg: #09090b;
+    --bride: #fb7185;
+    --groom: #60a5fa;
+    --danger: #f87171;
+    --ok: #4ade80;
+    --done: #52525b;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 16px 72px;
+  }
+
+  header.page {
+    max-width: 980px;
+    margin: 0 auto 28px;
+    text-align: center;
+  }
+  header.page h1 {
+    font-size: clamp(26px, 5vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  header.page .sub {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  /* segmented role switcher — mobile only */
+  .switcher {
+    display: none;
+    max-width: 980px;
+    margin: 0 auto 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .switcher button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 12px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .switcher button.active {
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  .switcher .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .switcher button[data-who="bride"] .dot { background: var(--bride); }
+  .switcher button[data-who="groom"] .dot { background: var(--groom); }
+  .switcher button:focus-visible { outline: 2px solid var(--line-strong); outline-offset: 1px; }
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  @media (max-width: 760px) {
+    body { padding-top: 24px; }
+    .switcher { display: flex; }
+    .columns { grid-template-columns: 1fr; }
+    .col:not(.active) { display: none; }
+  }
+
+  .col {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px 18px 22px;
+  }
+  .col.bride { --accent: var(--bride); }
+  .col.groom { --accent: var(--groom); }
+
+  .col-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 16px;
+  }
+  .col-head .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+  .col-head h2 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .col-head .count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 10px;
+  }
+
+  form.add {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 18px;
+  }
+  form.add label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  form.add input[type="text"],
+  form.add input[type="date"],
+  form.add input[type="time"],
+  form.add select {
+    width: 100%;
+    padding: 8px 11px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    color-scheme: light dark;
+  }
+  form.add input::placeholder { color: var(--muted); }
+  form.add input:focus-visible,
+  form.add select:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--line-strong);
+    outline-offset: 1px;
+  }
+  form.add .full { grid-column: 1 / -1; }
+  form.add .custom-tag { display: none; }
+  form.add .custom-tag.show { display: block; }
+  form.add button {
+    grid-column: 1 / -1;
+    padding: 9px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  form.add button:hover { opacity: 0.85; }
+
+  ul.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  li.task {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 11px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 13px;
+    background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  li.task:hover { border-color: var(--line-strong); }
+  li.task.done { opacity: 0.55; }
+  li.task.done .title { text-decoration: line-through; color: var(--done); }
+  li.task input[type="checkbox"] {
+    width: 16px; height: 16px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  li.task .title { font-weight: 500; overflow-wrap: anywhere; }
+  li.task .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .tag {
+    display: inline-block;
+    padding: 1px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .due { font-weight: 600; }
+  .due.overdue { color: var(--danger); }
+  .due.today { color: var(--ok); }
+  li.task .del {
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+  li.task .del:hover { color: var(--danger); background: var(--surface-2); }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 22px 8px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    font-size: 13px;
+  }
+</style>
+
+<header class="page">
+  <h1>Ślubna lista zadań</h1>
+  <p class="sub">Wspólny plan — każde z Was ma swoją listę.</p>
+</header>
+
+<nav class="switcher" aria-label="Wybór roli">
+  <button type="button" data-who="bride" class="active"><span class="dot"></span>Pani Młoda</button>
+  <button type="button" data-who="groom"><span class="dot"></span>Pan Młody</button>
+</nav>
+
+<div class="columns">
+  <section class="col bride active" data-who="bride">
+    <div class="col-head">
+      <span class="dot"></span>
+      <h2>Pani Młoda</h2>
+      <span class="count"></span>
+    </div>
+    <form class="add"></form>
+    <ul class="tasks"></ul>
+  </section>
+
+  <section class="col groom" data-who="groom">
+    <div class="col-head">
+      <span class="dot"></span>
+      <h2>Pan Młody</h2>
+      <span class="count"></span>
+    </div>
+    <form class="add"></form>
+    <ul class="tasks"></ul>
+  </section>
+</div>
+
+<script>
+(function () {
+  var STORE_KEY = 'wedding-todo-v1';
+  var ROLE_KEY = 'wedding-todo-role';
+  var BASE_TAGS = ['logistyka', 'przewiezienie rzeczy', 'jedzenie', 'pytanie', 'dokumenty', 'dekoracje', 'goście', 'strój', 'muzyka'];
+  var CUSTOM = '__custom__';
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && Array.isArray(d.tasks) && Array.isArray(d.tags)) return d;
+      }
+    } catch (e) {}
+    return { tasks: [], tags: [] };
+  }
+  var state = load();
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function allTags() {
+    return BASE_TAGS.concat(state.tags.filter(function (t) { return BASE_TAGS.indexOf(t) === -1; }));
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function fmtDate(dateStr) {
+    var d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function dueInfo(dateStr, done) {
+    if (!dateStr || done) return null;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var d = new Date(dateStr + 'T00:00:00');
+    var diff = Math.round((d - today) / 86400000);
+    if (diff < 0) return { cls: 'overdue', text: 'po terminie' };
+    if (diff === 0) return { cls: 'today', text: 'dziś!' };
+    if (diff === 1) return { cls: '', text: 'jutro' };
+    return { cls: '', text: 'za ' + diff + ' dni' };
+  }
+
+  function sortTasks(a, b) {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    var ka = (a.date || '9999-12-31') + 'T' + (a.time || '23:59');
+    var kb = (b.date || '9999-12-31') + 'T' + (b.time || '23:59');
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  }
+
+  function tagOptions() {
+    return allTags().map(function (t) {
+      return '<option value="' + escapeHtml(t) + '">' + escapeHtml(t) + '</option>';
+    }).join('') + '<option value="' + CUSTOM + '">+ własny tag…</option>';
+  }
+
+  function buildForm(form, who) {
+    form.innerHTML =
+      '<div class="full"><label>Zadanie</label>' +
+      '<input type="text" name="title" placeholder="np. potwierdzić menu z salą" required maxlength="200"></div>' +
+      '<div><label>Data</label><input type="date" name="date"></div>' +
+      '<div><label>Godzina</label><input type="time" name="time"></div>' +
+      '<div class="full"><label>Tag</label><select name="tag">' + tagOptions() + '</select></div>' +
+      '<div class="full custom-tag"><label>Własny tag</label>' +
+      '<input type="text" name="customTag" placeholder="np. fotograf" maxlength="40"></div>' +
+      '<button type="submit">Dodaj zadanie</button>';
+
+    form.querySelector('select[name="tag"]').addEventListener('change', function () {
+      form.querySelector('.custom-tag').classList.toggle('show', this.value === CUSTOM);
+    });
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var title = form.title.value.trim();
+      if (!title) return;
+      var tag = form.tag.value;
+      if (tag === CUSTOM) {
+        tag = form.customTag.value.trim();
+        if (tag && allTags().indexOf(tag) === -1) { state.tags.push(tag); refreshTagSelects(); }
+      }
+      state.tasks.push({
+        id: 't' + state.tasks.length + '_' + Math.floor(Math.random() * 1e9),
+        who: who,
+        title: title,
+        date: form.date.value || '',
+        time: form.time.value || '',
+        tag: tag || '',
+        done: false
+      });
+      save();
+      form.reset();
+      form.querySelector('.custom-tag').classList.remove('show');
+      render();
+    });
+  }
+
+  function refreshTagSelects() {
+    document.querySelectorAll('form.add select[name="tag"]').forEach(function (sel) {
+      var cur = sel.value;
+      sel.innerHTML = tagOptions();
+      if (Array.prototype.some.call(sel.options, function (o) { return o.value === cur; })) sel.value = cur;
+    });
+  }
+
+  function render() {
+    document.querySelectorAll('.col').forEach(function (col) {
+      var who = col.dataset.who;
+      var list = col.querySelector('ul.tasks');
+      var tasks = state.tasks.filter(function (t) { return t.who === who; }).sort(sortTasks);
+      var open = tasks.filter(function (t) { return !t.done; }).length;
+      col.querySelector('.count').textContent = tasks.length
+        ? open + ' do zrobienia / ' + tasks.length
+        : '0 zadań';
+
+      if (!tasks.length) {
+        list.innerHTML = '<li class="empty">Brak zadań — dodaj pierwsze powyżej</li>';
+        return;
+      }
+
+      list.innerHTML = tasks.map(function (t) {
+        var meta = [];
+        if (t.tag) meta.push('<span class="tag">' + escapeHtml(t.tag) + '</span>');
+        if (t.date) {
+          meta.push('<span>' + escapeHtml(fmtDate(t.date)) + (t.time ? ', ' + escapeHtml(t.time) : '') + '</span>');
+          var due = dueInfo(t.date, t.done);
+          if (due) meta.push('<span class="due ' + due.cls + '">' + due.text + '</span>');
+        } else if (t.time) {
+          meta.push('<span>godz. ' + escapeHtml(t.time) + '</span>');
+        }
+        return '<li class="task' + (t.done ? ' done' : '') + '" data-id="' + t.id + '">' +
+          '<input type="checkbox"' + (t.done ? ' checked' : '') + ' aria-label="Oznacz jako zrobione">' +
+          '<div><div class="title">' + escapeHtml(t.title) + '</div>' +
+          (meta.length ? '<div class="meta">' + meta.join('') + '</div>' : '') +
+          '</div>' +
+          '<button class="del" aria-label="Usuń zadanie" title="Usuń">✕</button>' +
+          '</li>';
+      }).join('');
+    });
+  }
+
+  /* role switcher (mobile) */
+  function setRole(who) {
+    document.querySelectorAll('.switcher button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.who === who);
+    });
+    document.querySelectorAll('.col').forEach(function (c) {
+      c.classList.toggle('active', c.dataset.who === who);
+    });
+    try { localStorage.setItem(ROLE_KEY, who); } catch (e) {}
+  }
+  document.querySelectorAll('.switcher button').forEach(function (b) {
+    b.addEventListener('click', function () { setRole(b.dataset.who); });
+  });
+  var savedRole = 'bride';
+  try { savedRole = localStorage.getItem(ROLE_KEY) || 'bride'; } catch (e) {}
+  setRole(savedRole === 'groom' ? 'groom' : 'bride');
+
+  document.querySelectorAll('.col').forEach(function (col) {
+    buildForm(col.querySelector('form.add'), col.dataset.who);
+
+    col.querySelector('ul.tasks').addEventListener('click', function (ev) {
+      var li = ev.target.closest('li.task');
+      if (!li) return;
+      var task = state.tasks.find(function (t) { return t.id === li.dataset.id; });
+      if (!task) return;
+      if (ev.target.matches('input[type="checkbox"]')) {
+        task.done = ev.target.checked;
+        save(); render();
+      } else if (ev.target.closest('.del')) {
+        state.tasks = state.tasks.filter(function (t) { return t.id !== task.id; });
+        save(); render();
+      }
+    });
+  });
+
+  render();
+})();
+</script>
