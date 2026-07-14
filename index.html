@@ -371,9 +371,14 @@
 
 <script>
 (function () {
-  /* jsonblob.com przechowuje dane; corsproxy.io omija brak nagłówków CORS w jsonblob */
-  var SYNC_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('https://jsonblob.com/api/jsonBlob/019f5b49-9817-77db-9793-d16eb7bc655f');
-  var POLL_MS = 8000;
+  /* jsonblob.com przechowuje dane; corsproxy.io omija brak nagłówków CORS w jsonblob.
+     BLOB_ID podmienia automatycznie skrypt scripts/backup.sh, gdy magazyn zniknie. */
+  var BLOB_ID = '019f620f-ab31-7f05-9fa9-17753a647629';
+  function syncUrl(bust) {
+    var target = 'https://jsonblob.com/api/jsonBlob/' + BLOB_ID + (bust ? '?b=' + Date.now() : '');
+    return 'https://corsproxy.io/?url=' + encodeURIComponent(target);
+  }
+  var POLL_MS = 20000;
   var TOMBSTONE_MS = 30 * 86400000; /* po 30 dniach usunięte zadania znikają też z magazynu */
   var STORE_KEY = 'wedding-todo-v2';
   var ROLE_KEY = 'wedding-todo-role';
@@ -435,7 +440,7 @@
     if (syncing) { syncQueued = true; return; }
     syncing = true;
     setSync('busy', 'synchronizuję…');
-    fetch(SYNC_URL, { cache: 'no-store' })
+    fetch(syncUrl(true), { cache: 'no-store' })
       .then(function (r) {
         if (!r.ok) throw new Error('GET ' + r.status);
         return r.json();
@@ -447,7 +452,7 @@
         saveLocal();
         render();
         if (fingerprint(merged) !== fingerprint(remote)) {
-          return fetch(SYNC_URL, {
+          return fetch(syncUrl(false), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(merged)
