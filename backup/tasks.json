@@ -1,5 +1,217 @@
 {
-    "tasks": [],
-    "tags": [],
-    "probe": "browser"
+    "tasks": [
+        {
+            "id": "t0_993992311",
+            "who": "groom",
+            "title": "Ogarn\u0105\u0107 du\u017cy samoch\u00f3d",
+            "date": "2026-07-13",
+            "time": "",
+            "tag": "przewiezienie rzeczy",
+            "done": false,
+            "updatedAt": 1,
+            "deleted": false
+        },
+        {
+            "id": "t1_230147040",
+            "who": "bride",
+            "title": "Winietki",
+            "date": "2026-07-14",
+            "time": "",
+            "tag": "dekoracje",
+            "done": false,
+            "updatedAt": 1,
+            "deleted": false
+        },
+        {
+            "id": "t2_69538491",
+            "who": "bride",
+            "title": "Zakupy kosmetyczne: g\u0105beczka, p\u0119dzelek, tusz",
+            "date": "2026-07-14",
+            "time": "",
+            "tag": "str\u00f3j",
+            "done": false,
+            "updatedAt": 1,
+            "deleted": false
+        },
+        {
+            "id": "t3_693513004",
+            "who": "groom",
+            "title": "Kupno kosmetyk\u00f3w w aptece",
+            "date": "2026-07-14",
+            "time": "",
+            "tag": "str\u00f3j",
+            "done": false,
+            "updatedAt": 1,
+            "deleted": false
+        },
+        {
+            "id": "tmrj6wnl9_euhtd9",
+            "who": "bride",
+            "title": "Op\u0142acenie fotograf: 1075 z\u0142",
+            "date": "2026-07-13",
+            "time": "",
+            "tag": "op\u0142ata",
+            "done": true,
+            "deleted": false,
+            "updatedAt": 1783945552933
+        },
+        {
+            "id": "tmrj6xvqv_4rwsjy",
+            "who": "bride",
+            "title": "Canva: Instrukcje do zrobienia ksi\u0119gi go\u015bci",
+            "date": "2026-07-13",
+            "time": "",
+            "tag": "UX weselny",
+            "done": true,
+            "deleted": false,
+            "updatedAt": 1783966771572
+        },
+        {
+            "id": "tmrj6y60p_5vvo2j",
+            "who": "bride",
+            "title": "Harmonogram wesela",
+            "date": "2026-07-13",
+            "time": "",
+            "tag": "UX weselny",
+            "done": true,
+            "deleted": false,
+            "updatedAt": 1783966772599
+        },
+        {
+            "id": "tmrj6yxb3_1nkmcr",
+            "who": "bride",
+            "title": "Rozplanowanie sto\u0142\u00f3w kto gdzie siedzi",
+            "date": "2026-07-13",
+            "time": "",
+            "tag": "UX weselny",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783945297695
+        },
+        {
+            "id": "tmrj6zd3d_4t5vkx",
+            "who": "bride",
+            "title": "Pranie",
+            "date": "2026-07-13",
+            "time": "",
+            "tag": "logistyka",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783945318153
+        },
+        {
+            "id": "tmrj75dld_di0e2d",
+            "who": "bride",
+            "title": "Butelki mycie",
+            "date": "2026-07-14",
+            "time": "19:00",
+            "tag": "dekoracje",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783945598737
+        },
+        {
+            "id": "tmrj75p4m_8zj20x",
+            "who": "groom",
+            "title": "Butelki mycie",
+            "date": "2026-07-14",
+            "time": "19:00",
+            "tag": "dekoracje",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783945613686
+        },
+        {
+            "id": "tmrjjqxw0_d1r5e3",
+            "who": "groom",
+            "title": "Kamizelka",
+            "date": "2026-07-15",
+            "time": "",
+            "tag": "str\u00f3j",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783966760208
+        },
+        {
+            "id": "tmrjjr56o_3b1w09",
+            "who": "groom",
+            "title": "Buty",
+            "date": "2026-07-15",
+            "time": "",
+            "tag": "str\u00f3j",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783966769664
+        },
+        {
+            "id": "tmrjjrkq8_cprw5x",
+            "who": "bride",
+            "title": "Wy\u015blij do druku harmonogram i instrukcje",
+            "date": "2026-07-14",
+            "time": "",
+            "tag": "dekoracje",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783966789808
+        },
+        {
+            "id": "tmrjjta5d_5rfyw2",
+            "who": "bride",
+            "title": "Playlista",
+            "date": "2026-07-15",
+            "time": "",
+            "tag": "muzyka",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783966869409
+        },
+        {
+            "id": "tmrjnigmw_ia594",
+            "who": "bride",
+            "title": "Owoce",
+            "date": "2026-07-16",
+            "time": "",
+            "tag": "jedzenie",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783973083064
+        },
+        {
+            "id": "tmrjniqiq_3kr4dq",
+            "who": "bride",
+            "title": "Przed\u0142u\u017cacz",
+            "date": "2026-07-16",
+            "time": "",
+            "tag": "logistyka",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783973095874
+        },
+        {
+            "id": "tmrjnyqov_co4plv",
+            "who": "bride",
+            "title": "Zapytaj sie Paw\u0142a o d\u0142ugi przed\u0142u\u017cacz",
+            "date": "2026-07-14",
+            "time": "",
+            "tag": "logistyka",
+            "done": false,
+            "deleted": false,
+            "updatedAt": 1783973842591
+        },
+        {
+            "id": "tmrl1ggd3_l15wq",
+            "who": "bride",
+            "title": "TEST-ODZYSKIWANIA",
+            "date": "",
+            "time": "",
+            "tag": "pytanie",
+            "done": false,
+            "deleted": true,
+            "updatedAt": 1784057013688
+        }
+    ],
+    "tags": [
+        "op\u0142ata",
+        "UX weselny"
+    ]
 }
