@@ -373,7 +373,7 @@
 (function () {
   /* jsonblob.com przechowuje dane; corsproxy.io omija brak nagłówków CORS w jsonblob.
      BLOB_ID podmienia automatycznie skrypt scripts/backup.sh, gdy magazyn zniknie. */
-  var BLOB_ID = '019f620f-ab31-7f05-9fa9-17753a647629';
+  var BLOB_ID = '019f6213-5823-7968-a385-5e8b1b42eb02';
   function syncUrl(bust) {
     var target = 'https://jsonblob.com/api/jsonBlob/' + BLOB_ID + (bust ? '?b=' + Date.now() : '');
     return 'https://corsproxy.io/?url=' + encodeURIComponent(target);
